@@ -446,6 +446,8 @@ class CollectionLoader:
         with open(csv_path, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
 
+                unique_list = []
+        
                 for row in reader:
                     try:
                         # Parse row
@@ -486,7 +488,13 @@ class CollectionLoader:
                             document['created_date'] = datetime.strptime(createdDateStr,date_format_string).replace(tzinfo=timezone.utc)
                             document['last_login_date'] = datetime.strptime(lastLoginDateStr,date_format_string).replace(tzinfo=timezone.utc)
 
-                        batch.append(document)
+                        # don't add the same video twice
+                        if collection_name == "videos":
+                            if document['name'] not in unique_list:
+                                batch.append(document)
+                                unique_list.append(document['name'])
+                        else: 
+                            batch.append(document)
 
                         # Insert batch
                         if len(batch) >= batch_size:
